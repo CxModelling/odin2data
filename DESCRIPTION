@@ -6,6 +6,11 @@ Author: Chu-Chang Ku
 Maintainer: TimeWz667 <TimeWz667@gmail.com>
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
-License: MIT
+URL: https://github.com/TimeWz667/odin2data.git
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
+Import:
+  odin
+
+RoxygenNote: 7.0.2
