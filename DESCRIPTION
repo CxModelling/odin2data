@@ -1,0 +1,11 @@
+Package: odin2data
+Type: Package
+Title: A Model Fitting Toolkit For Simulation Models With The Odin Package (Title Case)
+Version: 0.1.0
+Author: Chu-Chang Ku
+Maintainer: TimeWz667 <TimeWz667@gmail.com>
+Description: More about what it does (maybe more than one line)
+    Use four spaces when indenting paragraphs within the Description.
+License: MIT
+Encoding: UTF-8
+LazyData: true
