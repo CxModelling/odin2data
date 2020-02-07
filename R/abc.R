@@ -1,4 +1,4 @@
-#' Title
+#' Approximate Bayesian Computation (ABC) for System dynamic models
 #'
 #' @param sim
 #' @param n_posterior
@@ -10,6 +10,58 @@
 #' @export
 #'
 #' @examples
+#' library(odin2data)
+#'
+#' test_data <- data.frame(
+#'   t = 1:5,
+#'   incidence = c(20, 49, 109, 184, 206) / 1000
+#' )
+#'
+#'
+#' test_m <- odin::odin({
+#'   deriv(sus) <- - foi
+#'   deriv(inf) <- foi - gamma * inf
+#'   deriv(rec) <- gamma * inf
+#'
+#'   initial(sus) <- y0[1]
+#'   initial(inf) <- y0[2]
+#'   initial(rec) <- y0[3]
+#'
+#'   output(incidence) <- foi / n
+#'
+#'   # parameters
+#'   n <- sus + inf + rec
+#'   beta <- user(1.5)
+#'   gamma <- user(0.5)
+#'
+#'   foi <- beta * sus * inf / n
+#'
+#'   # data
+#'   y0[] <- user()
+#'   dim(y0) <- 3
+#' }, verbose=F)
+#'
+#'
+#' r_prior <- function() {
+#'   list(
+#'     beta = runif(1, 1, 10),
+#'     gamma = runif(1, .1, 1)
+#'   )
+#' }
+#'
+#' d_prior <- function(pars) {
+#'   dunif(pars$beta, 1, 10, log = T) + dunif(pars$gamma, .1, 1, log = T)
+#' }
+#'
+#'
+#' times = seq(0, 10, 0.2)
+#' y0 <- c(995, 5, 0)
+#'
+#' sim <- compile_likefree_model(test_data, test_m, y0, rprior = r_prior, dprior = d_prior, times = times)
+#'
+#' fitted <- fit_abc(sim)
+#'
+#' summary(fitted)
 fit_abc <- function(sim, n_posterior = 300, epsilon = NA, keep_all = FALSE, target_acc = 0.05) {
   # Finding epsilon --------------------------
   if (is.na(epsilon)) {

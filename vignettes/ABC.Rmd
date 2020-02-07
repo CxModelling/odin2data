@@ -1,0 +1,107 @@
+---
+title: "ABC for System Dynamic models"
+author: "TimeWz667"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Load package
+```{r }
+library(odin2data)
+```
+
+
+## Input data
+```{r }
+test_data <- data.frame(
+  t = 1:5,
+  incidence = c(20, 49, 109, 184, 206) / 1000
+)
+```
+```{r, echo=FALSE, results='asis'}
+knitr::kable(test_data)
+```
+
+
+## Construct a model with odin
+```{r }
+test_m <- odin::odin({
+  deriv(sus) <- - foi
+  deriv(inf) <- foi - gamma * inf
+  deriv(rec) <- gamma * inf
+
+  initial(sus) <- y0[1]
+  initial(inf) <- y0[2]
+  initial(rec) <- y0[3]
+
+  output(incidence) <- foi / n
+
+  # parameters
+  n <- sus + inf + rec
+  beta <- user(1.5)
+  gamma <- user(0.5)
+
+  foi <- beta * sus * inf / n
+
+  # data
+  y0[] <- user()
+  dim(y0) <- 3
+}, verbose=F)
+```
+
+
+## Set up prior distribution with list
+```{r}
+r_prior <- function() {
+  list(
+    beta = runif(1, 1, 10),
+    gamma = runif(1, .1, 1)
+  )
+}
+
+d_prior <- function(pars) {
+  dunif(pars$beta, 1, 10, log = T) + dunif(pars$gamma, .1, 1, log = T)
+}
+```
+
+
+## Compile the model components
+```{r}
+times = seq(0, 10, 0.2)
+y0 <- c(995, 5, 0)
+
+sim <- compile_likefree_model(test_data, test_m, y0, rprior = r_prior, dprior = d_prior, times = times)
+```
+
+
+## Fit the model to data
+```{r}
+fitted <- fit_abc(sim, n_posterior = 100)
+```
+
+
+```{r, echo=FALSE, results='asis'}
+knitr::kable(summary(fitted)$Post, digits = 2)
+```
+
+
+## Visualisation (todo)
+
+
+
+```{r, fig.show='hold'}
+plot(1:10)
+plot(10:1)
+```
+

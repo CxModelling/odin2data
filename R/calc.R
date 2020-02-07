@@ -26,7 +26,7 @@ calc_dist.likefree_model <- function(sim, pars) {
 calc_dist.sim_results <- function(sim) {
   simulated <- sim$ys
   rownames(simulated) <- simulated[, 1]
-  simulated <- simulated[res$model$ts_to_fit, res$model$cols_to_fit]
+  simulated <- simulated[sim$model$ts_to_fit, sim$model$cols_to_fit]
 
   dist <- - sum(dnorm(simulated, sim$model$data[, -1], log=T), na.rm = T)
   return(dist)
