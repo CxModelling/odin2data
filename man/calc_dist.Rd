@@ -2,15 +2,18 @@
 % Please edit documentation in R/calc.R
 \name{calc_dist}
 \alias{calc_dist}
-\alias{calc_dist.likefree_model}
+\alias{calc_dist.sim_model}
+\alias{calc_dist.sim_model_likefree}
 \alias{calc_dist.sim_results}
 \title{Calculate the distance between data and simulated dynamics}
 \usage{
 calc_dist(sim, pars, ...)
 
-\method{calc_dist}{likefree_model}(sim, pars)
+\method{calc_dist}{sim_model}(sim, pars, dat)
 
-\method{calc_dist}{sim_results}(sim)
+\method{calc_dist}{sim_model_likefree}(lf, pars)
+
+\method{calc_dist}{sim_results}(rs, lf)
 }
 \arguments{
 \item{...}{}

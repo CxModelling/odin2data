@@ -2,12 +2,15 @@
 % Please edit documentation in R/warmup.R
 \name{warmup}
 \alias{warmup}
-\alias{warmup.likefree_model}
+\alias{warmup.sim_model}
+\alias{update.Y_eq}
 \title{Warming-up a model to a steady state}
 \usage{
 warmup(sim, ...)
 
-\method{warmup}{likefree_model}(sim, y0 = NA, pars, t_warmup = NA)
+\method{warmup}{sim_model}(sim, y0, pars, times = sim$TS_sim)
+
+\method{update}{Y_eq}(yeq, sim, nforward = length(sim$TS_wp))
 }
 \arguments{
 \item{...}{}
