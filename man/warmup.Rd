@@ -8,7 +8,7 @@
 \usage{
 warmup(sim, ...)
 
-\method{warmup}{sim_model}(sim, y0, pars, times = sim$TS_sim)
+\method{warmup}{sim_model}(sim, y0, pars, times = sim$TS_wp)
 
 \method{update}{Y_eq}(yeq, sim, nforward = length(sim$TS_wp))
 }

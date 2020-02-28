@@ -14,7 +14,7 @@ warmup <- function(sim, ...) {
 
 #' @rdname warmup
 #' @export
-warmup.sim_model <- function(sim, y0, pars, times = sim$TS_sim) {
+warmup.sim_model <- function(sim, y0, pars, times = sim$TS_wp) {
   stopifnot(sim$WarmupStage == "Yes")
 
   if (missing(pars)) {
@@ -34,7 +34,7 @@ warmup.sim_model <- function(sim, y0, pars, times = sim$TS_sim) {
   ys <- cm_wp$run(times)
 
   if ("Checker" %in% names(sim)) {
-    stopifnot(fn_check(ys))
+    stopifnot(sim$Checker(ys))
   }
 
   y0 = sim$Linker(ys)
