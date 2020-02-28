@@ -1,4 +1,4 @@
-#' Simulate a system dynamic
+#' Simulate a single run
 #'
 #' @param sim
 #' @param ...
@@ -7,19 +7,43 @@
 #' @export
 #'
 #' @examples
-simulate.likefree_model <- function(sim, y0=NA, pars=NA, times=NA) {
-  if(all(is.na(pars))) pars <- sim$r_prior()
+simulate.sim_model <- function(sim, y0, pars, warmup = F) {
+  if (missing(pars)) {
+    pars <- sim$r_prior()
+  }
 
-  y_eq <- warmup(sim, y0, pars)
+  if (missing(y0)) {
+    y0 <- sim$Y0_sim
+  }
 
-  ys <- project(sim, y_eq, pars, times)
+  if (warmup & sim$WarmupStage == "Yes") {
+    temp <- warmup(sim, y0 = y0, pars = pars)
+    if (class(temp) != "Y_eq") return("Eq check failed")
+
+    pars <- temp$Parameters
+    y0 <- temp$Y0
+  }
+
+  inp <- pars
+  inp$Y0 <- y0
+
+  cm_sim <- sim$CM_sim
+  cm_sim$set_user(user = inp)
+
+  st <- system.time({ ys <- cm_sim$run(sim$TS_sim) })
 
   res <- list(
-    model = sim,
-    y_eq = y_eq,
-    pars = pars,
-    ys = ys
+    Y0 = y0,
+    Parameters = pars,
+    Ys = ys,
+    ProcTime = st
   )
   class(res) <- "sim_results"
   return(res)
+}
+
+
+
+simulate.sim_model_likefree <- function(sim, y0, pars, warmup = F) {
+  return(simulate(sim$Model, y0, pars, warmup))
 }

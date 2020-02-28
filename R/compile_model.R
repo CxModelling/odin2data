@@ -1,48 +1,154 @@
-#' Compiling a likelihood-free simulation model
+#' @rdname compile_model
+#' @export
+test_model <- function(d_prior, r_prior, y0, inp_sim, ts_sim, m_sim, inp_wp, t_wp, m_wp, fn_pass_y0, fn_check) {
+  res <- list()
+
+  fp <- r_prior()
+  res$FreeParameters <- fp
+
+  stopifnot(is.finite(d_prior(fp)))
+
+  res$d_prior <- d_prior
+  res$r_prior <- r_prior
+
+
+  if (missing(t_wp) | missing(m_wp) | missing(fn_pass_y0)) {
+    res$WarmupStage <- "No"
+  } else {
+    res$WarmupStage <- "Yes"
+
+    pars <- fp
+    if (!missing(inp_wp) & !any(is.null(inp_wp))) {
+      pars <- c(inp_wp, pars)
+    } else {
+      inp_wp <- NULL
+    }
+
+    pars$Y0 <- y0
+
+    cm_wp <- m_wp(user = pars)
+    ts_wp <- ts_sim[1] - (t_wp:0)
+
+    st <- system.time({ ys0 <- cm_wp$run(ts_wp) })
+    cat("Warm-up time:\n")
+    print(st)
+
+    ys0 <- ys0[ts_wp == round(ts_wp), ]
+
+    res <- c(res, list(
+      Input_wp = inp_wp,
+      Y0_wp = y0,
+      Ys_wp = ys0,
+      CM_wp = cm_wp,
+      Time_wp = range(ts_wp),
+      TS_wp = ts_wp
+    ))
+
+    if(!missing(fn_check)) {
+      stopifnot(fn_check(ys0))
+      res$Checker <- fn_check
+    }
+    y0 <- fn_pass_y0(ys0)
+    res$Linker = fn_pass_y0
+  }
+
+  pars <- fp
+  if (!missing(inp_sim) & !any(is.null(inp_sim))) {
+    pars <- c(inp_sim, pars)
+  } else {
+    inp_sim <- NULL
+  }
+  pars$Y0 <- y0
+
+  cm_sim <- m_sim(user = pars)
+
+  st <- system.time({ ys1 <- cm_sim$run(ts_sim) })
+  cat("Simulation time:\n")
+  print(st)
+
+  ys1 <- ys1[ts_sim == round(ts_sim),]
+
+  res <- c(res, list(
+    Input_sim = inp_sim,
+    Y0_sim = y0,
+    Ys_sim = ys1,
+    CM_sim = cm_sim,
+    Time_sim = range(ts_sim),
+    TS_sim = ts_sim
+  ))
+  return(res)
+}
+
+
+#' Compile a simulation model given all components
 #'
-#' @param dat a dataframe of data to be fitted, "t" as the indicator of time
-#' @param m_sim an odin model
-#' @param y0 initial values of the model
-#' @param rprior a function for simulating prior parameters
-#' @param dprior a function for calulating prior probability in log scale
-#' @param times a vectors of times for projecting resutls
-#' @param m_warmup a odin model for warm-up period
-#' @param t_warmup the length of warm-up period
+#' @param d_prior a probability density function supporting prior distributions
+#' @param r_prior a function for generating parameters from their prior distributions
+#' @param y0 initial values
+#' @param inp_sim input data for the simulation stage
+#' @param ts_sim timespan for simulation
+#' @param m_sim an odin model for simulation
+#' @param inp_wp input data for the warm-up stage
+#' @param t_wp length of warm-up stage
+#' @param m_wp an odin model for waru-up
+#' @param fn_pass_y0 a function for bringing the states at the end of warm-up to simulation initials
+#' @param fn_check a function for checking if a parameter set can generate validated output
 #'
 #' @return
 #' @export
 #'
 #' @examples
-compile_likefree_model <- function(dat, m_sim, y0, rprior, dprior, times=dat[, "t"],
-                                   m_warmup=NA, t_warmup=100) {
+compile_model <- function(d_prior, r_prior, y0, inp_sim = NULL, ts_sim, m_sim, inp_wp = NULL, t_wp, m_wp = m_sim,
+                          fn_pass_y0, fn_check, max_attempt = 10) {
+  n_attempt <- 0
 
-  sim <- list(data=dat, y0=y0,
-              r_prior=rprior, d_prior=dprior,
-              m_sim=m_sim, m_warmup=m_warmup)
-
-
-  stopifnot(is.finite(dprior(rprior())))
-
-  if (is.na(m_warmup)) {
-    sim$cm_warmup <- NA
-    sim$ts_warmup <- NA
-  } else {
-    env <- r_prior()
-    env$y0 <- y0
-
-    sim$cm_warmup <- m_warmup(user=env)
-    sim$ts_warmup <- seq(min(times) - t_warmup, min(times), by=1)
+  if (missing(fn_check)) {
+    fn_check <- function(x) { T }
   }
 
-  env <- r_prior()
-  env$y0 <- y0
+  while(T) {
+    tested <- test_model(d_prior, r_prior, y0, inp_sim, ts_sim, m_sim, inp_wp, t_wp, m_wp, fn_pass_y0, fn_check)
 
-  sim$cm_sim <- m_sim(user=env)
-  sim$ts_sim <- sort(times)
+    n_attempt <- n_attempt + 1
+    if (is.list(tested)) break
 
-  sim$ts_to_fit <- sort(intersect(dat[, "t"], sim$ts_sim))
-  sim$cols_to_fit <- colnames(dat)[-1]
-
-  class(sim) <- "likefree_model"
-  return(sim)
+    stopifnot(n_attempt < max_attempt)
+  }
+  class(tested) <- "sim_model"
+  return(tested)
 }
+
+
+#' Compile a simulation model with a likelihood-free link to data
+#'
+#' @param dat a dataframe of data to be fitted, "t" as the indicator of time
+#' @param sim a compile model, see compile_model
+#' @param y0 initial values of the model
+#'
+#' @return
+#' @export
+#'
+#' @examples
+compile_model_likefree <- function(dat, sim) {
+
+  vars <- intersect(colnames(sim$Ys_sim), colnames(dat))
+  vars <- vars[vars != "t"]
+
+  res <- list(
+    Data = dat,
+    Model = sim,
+    Cols2fit = vars,
+    Ts2fit = dat[, "t"]
+  )
+
+  class(res) <- "sim_model_likefree"
+  return(res)
+}
+
+
+
+
+
+
+
+

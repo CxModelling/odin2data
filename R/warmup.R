@@ -14,25 +14,45 @@ warmup <- function(sim, ...) {
 
 #' @rdname warmup
 #' @export
-warmup.likefree_model <- function(sim, y0=NA, pars, t_warmup=NA) {
-  if (all(is.na(y0))) y0 <- sim$y0
+warmup.sim_model <- function(sim, y0, pars, times = sim$TS_sim) {
+  stopifnot(sim$WarmupStage == "Yes")
 
-  if (is.na(sim$cm_warmup)) {
-    return(y0)
+  if (missing(pars)) {
+    pars <- sim$r_prior()
   }
 
-  if (!is.na(t_warmup)) {
-    ts_warmup <- seq(min(sim$ts_sim) - t_warmup, min(sim$ts_sim), by=1)
-  } else {
-    ts_warmup <- sim$ts_warmup
+  if (missing(y0)) {
+    y0 <- sim$Y0_wp
   }
 
-  env <- pars
-  env$y0 <- y0
-  m <- sim$cm_warmup
-  m$set_user(user=env)
-  ys <- m$run(ts_warmup)
-  y_eq <- ys[nrow(ys), 1:length(y0) + 1]
+  inp <- pars
+  inp$Y0 <- y0
 
-  return(y_eq)
+  cm_wp <- sim$CM_wp
+  cm_wp$set_user(user = inp)
+
+  ys <- cm_wp$run(times)
+
+  if ("Checker" %in% names(sim)) {
+    stopifnot(fn_check(ys))
+  }
+
+  y0 = sim$Linker(ys)
+
+  res <- list(
+    Y0 = y0,
+    Parameters = pars
+  )
+
+  class(res) <- "Y_eq"
+
+  return(res)
+}
+
+
+#' @rdname warmup
+#' @export
+update.Y_eq <- function(yeq, sim, nforward = length(sim$TS_wp)) {
+  times <- sim$Time_wp[2] - nforward:0
+  return(warmup(sim, y0 = yeq$Y0, pars = yeq$Parameters, times = times))
 }
