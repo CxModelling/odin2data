@@ -9,7 +9,7 @@ fit_abc(
   lf,
   n_posterior = 300,
   epsilon = NA,
-  keep_all = F,
+  keep = c("Y0", "Ys", "both", "none"),
   target_acc = 0.1,
   n_test = 100
 )
@@ -19,7 +19,15 @@ fit_abc(
 \arguments{
 \item{lf}{a "model_likefree" object with a compile model and data}
 
-\item{target_acc}{}
+\item{n_posterior}{number of posteriors to collect}
+
+\item{epsilon}{threshold for collecting}
+
+\item{keep}{simulation results to keep; "Y0": initial values, "Ys": trajectories, "both": both, "none": none}
+
+\item{target_acc}{target acceptance rate}
+
+\item{n_test}{number of simulations for testing threshold}
 }
 \value{
 
@@ -30,54 +38,57 @@ Approximate Bayesian Computation (ABC) for System dynamic models
 \examples{
 library(odin2data)
 
+## Example 1: model without warmup stage
 test_data <- data.frame(
-  t = 1:5,
-  incidence = c(20, 49, 109, 184, 206) / 1000
+t = 1:5,
+incidence = c(20, 49, 109, 184, 206) / 1000
 )
 
-
-test_m <- odin::odin({
-  deriv(sus) <- - foi
-  deriv(inf) <- foi - gamma * inf
-  deriv(rec) <- gamma * inf
-
-  initial(sus) <- y0[1]
-  initial(inf) <- y0[2]
-  initial(rec) <- y0[3]
-
-  output(incidence) <- foi / n
-
-  # parameters
-  n <- sus + inf + rec
-  beta <- user(1.5)
-  gamma <- user(0.5)
-
-  foi <- beta * sus * inf / n
-
-  # data
-  y0[] <- user()
-  dim(y0) <- 3
-}, verbose=F)
+### Load the model file
+f <- system.file("models/SIR.txt", package = "odin2data")
+test_m <- odin::odin(f, verbose=F)
 
 
+### Generate a prior and set up it as a list
 r_prior <- function() {
-  list(
-    beta = runif(1, 1, 10),
-    gamma = runif(1, .1, 1)
-  )
+  list(beta = runif(1, 1, 10), gamma = runif(1, .1, 1))
 }
 
 d_prior <- function(pars) {
   dunif(pars$beta, 1, 10, log = T) + dunif(pars$gamma, .1, 1, log = T)
 }
 
-
 times = seq(0, 10, 0.2)
 y0 <- c(995, 5, 0)
 
-sim <- compile_likefree_model(test_data, test_m, y0, rprior = r_prior, dprior = d_prior, times = times)
+### Compile all elements as a simulation model
+sim <- odin2data::compile_model(d_prior, r_prior, y0, ts_sim = times, m_sim = test_m)
 
-fitted <- fit_abc(sim)
+### Compile the model with data
+lf <- odin2data::compile_model_likefree(test_data, sim)
 
-summary(fitted)
+### Model fitting
+post <- odin2data::fit_abc(lf, 100, target_acc = 0.2)
+summary(post)
+
+
+## Example 2: model with warmup stage
+fn_pass_y0 <- function(ys) {
+ys[nrow(ys), 2:4]
+}
+
+test_data <- data.frame(
+  t = 1:5,
+  incidence = rep(0.009580023, 5)
+)
+
+sim <- odin2data::compile_model(d_prior, r_prior, y0, ts_sim = times, m_sim = test_m,
+                                m_wp = test_m, t_wp = 100, fn_pass_y0 = fn_pass_y0)
+
+lf <- odin2data::compile_model_likefree(test_data, sim)
+
+### Model fitting
+post <- odin2data::fit_abc(lf, 100, target_acc = 0.2)
+summary(post)
+
 }
