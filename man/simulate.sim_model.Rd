@@ -2,9 +2,12 @@
 % Please edit documentation in R/simulate.R
 \name{simulate.sim_model}
 \alias{simulate.sim_model}
+\alias{simulate.sim_model_likefree}
 \title{Simulate a single run}
 \usage{
 \method{simulate}{sim_model}(sim, y0, pars, warmup = F)
+
+\method{simulate}{sim_model_likefree}(sim, y0, pars, warmup = F)
 }
 \arguments{
 \item{...}{}

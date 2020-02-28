@@ -12,16 +12,19 @@ simulate.sim_model <- function(sim, y0, pars, warmup = F) {
     pars <- sim$r_prior()
   }
 
-  if (missing(y0)) {
-    y0 <- sim$Y0_sim
-  }
-
   if (warmup & sim$WarmupStage == "Yes") {
+    if (missing(y0)) {
+      y0 <- sim$Y0_wp
+    }
     temp <- warmup(sim, y0 = y0, pars = pars)
     if (class(temp) != "Y_eq") return("Eq check failed")
 
     pars <- temp$Parameters
     y0 <- temp$Y0
+  } else {
+    if (missing(y0)) {
+      y0 <- sim$Y0_sim
+    }
   }
 
   inp <- pars
@@ -43,7 +46,8 @@ simulate.sim_model <- function(sim, y0, pars, warmup = F) {
 }
 
 
-
+#' @rdname simulate.sim_model
+#' @export
 simulate.sim_model_likefree <- function(sim, y0, pars, warmup = F) {
   return(simulate(sim$Model, y0, pars, warmup))
 }
