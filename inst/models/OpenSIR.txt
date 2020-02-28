@@ -1,0 +1,23 @@
+deriv(sus) <- bn - inc - dr * sus
+deriv(inf) <- inc - gamma * inf - dr * inf
+deriv(rec) <- gamma * inf - dr * rec
+
+initial(sus) <- Y0[1]
+initial(inf) <- Y0[2]
+initial(rec) <- Y0[3]
+
+output(incidence) <- inc / n
+
+# parameters
+n <- sus + inf + rec
+beta <- user(1.5)
+gamma <- user(0.5)
+dr <- user(0.01)
+
+bn <- n * dr
+
+inc <- beta * (sus / n) * inf
+
+# data
+Y0[] <- user()
+dim(Y0) <- 3
