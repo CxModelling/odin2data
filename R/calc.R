@@ -15,20 +15,28 @@ calc_dist <- function(sim, pars, ...) {
 
 #' @rdname calc_dist
 #' @export
-calc_dist.likefree_model <- function(sim, pars) {
-  res <- simulate(sim, pars=pars)
-  return(calc_dist(res))
+calc_dist.sim_model <- function(sim, pars, dat) {
+  lf <- compile_model_likefree(dat, sim)
+  return(calc_dist(lf, pars))
 }
 
 
 #' @rdname calc_dist
 #' @export
-calc_dist.sim_results <- function(sim) {
-  simulated <- sim$ys
-  rownames(simulated) <- simulated[, 1]
-  simulated <- simulated[sim$model$ts_to_fit, sim$model$cols_to_fit]
+calc_dist.sim_model_likefree <- function(lf, pars) {
+  rs <- simulate(lf, pars = pars, warmup = lf$Model$WarmupStage == "Yes")
+  return(calc_dist(rs, lf))
+}
 
-  dist <- - sum(dnorm(simulated, sim$model$data[, -1], log=T), na.rm = T)
+
+#' @rdname calc_dist
+#' @export
+calc_dist.sim_results <- function(rs, lf) {
+  simulated <- rs$Ys
+  rownames(simulated) <- simulated[, 1]
+  simulated <- simulated[lf$Ts2fit, lf$Cols2fit]
+
+  dist <- - sum(dnorm(simulated, lf$Data[, -1], log=T), na.rm = T)
   return(dist)
 }
 
