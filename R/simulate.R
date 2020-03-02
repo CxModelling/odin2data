@@ -7,7 +7,7 @@
 #' @export
 #'
 #' @examples
-simulate.sim_model <- function(sim, y0, pars, warmup = F) {
+simulate.sim_model <- function(sim, y0, pars, warmup = F, ...) {
   if (missing(pars)) {
     pars <- sim$r_prior()
   }
@@ -35,7 +35,7 @@ simulate.sim_model <- function(sim, y0, pars, warmup = F) {
   cm_sim <- sim$CM_sim
   cm_sim$set_user(user = inp)
 
-  st <- system.time({ ys <- cm_sim$run(sim$TS_sim) })
+  st <- system.time({ ys <- cm_sim$run(sim$TS_sim, ...) })
 
   res <- list(
     Y0 = y0,
@@ -50,6 +50,6 @@ simulate.sim_model <- function(sim, y0, pars, warmup = F) {
 
 #' @rdname simulate.sim_model
 #' @export
-simulate.sim_model_likefree <- function(sim, y0, pars, warmup = F) {
-  return(simulate(sim$Model, y0, pars, warmup))
+simulate.sim_model_likefree <- function(sim, y0, pars, warmup = F, ...) {
+  return(simulate(sim$Model, y0, pars, warmup, ...))
 }

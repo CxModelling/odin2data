@@ -1,6 +1,6 @@
 #' @rdname compile_model
 #' @export
-test_model <- function(d_prior, r_prior, y0, inp_sim, ts_sim, m_sim, inp_wp, t_wp, m_wp, fn_pass_y0, fn_check) {
+test_model <- function(d_prior, r_prior, y0, inp_sim, ts_sim, m_sim, inp_wp, t_wp, m_wp, fn_pass_y0, fn_check, method) {
   res <- list()
 
   fp <- r_prior()
@@ -62,7 +62,8 @@ test_model <- function(d_prior, r_prior, y0, inp_sim, ts_sim, m_sim, inp_wp, t_w
 
   cm_sim <- m_sim(user = pars)
 
-  st <- system.time({ ys1 <- cm_sim$run(ts_sim) })
+  if (is.null(method)) method = "rk4"
+  st <- system.time({ ys1 <- cm_sim$run(ts_sim, method = method) })
   cat("Simulation time:\n")
   print(st)
 
@@ -74,7 +75,8 @@ test_model <- function(d_prior, r_prior, y0, inp_sim, ts_sim, m_sim, inp_wp, t_w
     Ys_sim = ys1,
     CM_sim = cm_sim,
     Time_sim = range(ts_sim),
-    TS_sim = ts_sim
+    TS_sim = ts_sim,
+    Method = method
   ))
   return(res)
 }
@@ -99,7 +101,7 @@ test_model <- function(d_prior, r_prior, y0, inp_sim, ts_sim, m_sim, inp_wp, t_w
 #'
 #' @examples
 compile_model <- function(d_prior, r_prior, y0, inp_sim = NULL, ts_sim, m_sim, inp_wp = NULL, t_wp, m_wp = m_sim,
-                          fn_pass_y0, fn_check, max_attempt = 10) {
+                          fn_pass_y0, fn_check, method = NULL, max_attempt = 10) {
   n_attempt <- 0
 
   if (missing(fn_check)) {
@@ -108,7 +110,7 @@ compile_model <- function(d_prior, r_prior, y0, inp_sim = NULL, ts_sim, m_sim, i
 
   while(T) {
     tested <- tryCatch({
-      test_model(d_prior, r_prior, y0, inp_sim, ts_sim, m_sim, inp_wp, t_wp, m_wp, fn_pass_y0, fn_check)
+      test_model(d_prior, r_prior, y0, inp_sim, ts_sim, m_sim, inp_wp, t_wp, m_wp, fn_pass_y0, fn_check, method)
     }, error = function(e) e)
 
 
@@ -147,11 +149,3 @@ compile_model_likefree <- function(dat, sim) {
   class(res) <- "sim_model_likefree"
   return(res)
 }
-
-
-
-
-
-
-
-
