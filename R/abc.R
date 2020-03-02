@@ -82,10 +82,11 @@ fit_abc <- function(lf, n_posterior = 300, epsilon = NA, keep = c("Y0", "Ys", "b
     ds <- rep(0, n_test)
     for (i in 1:n_test) {
       pars <- sim$r_prior()
-      ds[i] <- calc_dist(lf, pars)
+      ds[i] <- tryCatch({ calc_dist(lf, pars) }, error = function(e) Inf )
     }
 
     epsilon <- as.numeric(quantile(ds, target_acc))
+    stopifnot(is.finite(epsilon))
   }
 
   cat("Collect posteriors\n")
@@ -96,7 +97,15 @@ fit_abc <- function(lf, n_posterior = 300, epsilon = NA, keep = c("Y0", "Ys", "b
 
   while(n_collected < n_posterior) {
     pars <- sim$r_prior()
-    res <- simulate(lf, pars = pars)
+
+    res <- tryCatch({
+      simulate(lf, pars = pars)
+    }, error = function(e) "Fail")
+
+    if (!is.list(res)) {
+      n_run <- n_run + 1
+      next
+    }
     dist <- calc_dist(res, lf)
     n_run <- n_run + 1
 

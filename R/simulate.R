@@ -12,12 +12,14 @@ simulate.sim_model <- function(sim, y0, pars, warmup = F) {
     pars <- sim$r_prior()
   }
 
+  stopifnot(is.finite(sim$d_prior(pars)))
+
   if (warmup & sim$WarmupStage == "Yes") {
     if (missing(y0)) {
       y0 <- sim$Y0_wp
     }
-    temp <- warmup(sim, y0 = y0, pars = pars)
-    if (class(temp) != "Y_eq") return("Eq check failed")
+    temp <- tryCatch({ warmup(sim, y0 = y0, pars = pars) }, error = function(e) "Warmup failed")
+    if (class(temp) != "Y_eq") return(temp)
 
     pars <- temp$Parameters
     y0 <- temp$Y0

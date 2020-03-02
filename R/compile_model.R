@@ -107,7 +107,10 @@ compile_model <- function(d_prior, r_prior, y0, inp_sim = NULL, ts_sim, m_sim, i
   }
 
   while(T) {
-    tested <- test_model(d_prior, r_prior, y0, inp_sim, ts_sim, m_sim, inp_wp, t_wp, m_wp, fn_pass_y0, fn_check)
+    tested <- tryCatch({
+      test_model(d_prior, r_prior, y0, inp_sim, ts_sim, m_sim, inp_wp, t_wp, m_wp, fn_pass_y0, fn_check)
+    }, error = function(e) e)
+
 
     n_attempt <- n_attempt + 1
     if (is.list(tested)) break
