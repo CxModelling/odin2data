@@ -33,10 +33,10 @@ calc_dist.sim_model_likefree <- function(lf, pars) {
 #' @export
 calc_dist.sim_results <- function(rs, lf) {
   simulated <- rs$Ys
-  rownames(simulated) <- simulated[, 1]
-  simulated <- simulated[lf$Ts2fit, lf$Cols2fit]
-
-  dist <- - sum(dnorm(simulated, lf$Data[, -1], log=T), na.rm = T)
+  sel <- simulated[, 1] %in% lf$Ts2fit
+  rows <- simulated[sel, 1]
+  simulated <- simulated[sel, lf$Cols2fit]
+  dist <- - sum(dnorm(simulated, lf$Data[lf$Data[sel, 1] %in% rows, -1], log=T), na.rm = T)
   return(dist)
 }
 
