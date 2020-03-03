@@ -5,14 +5,8 @@
 \alias{summary.fitted_abc}
 \title{Approximate Bayesian Computation (ABC) for System dynamic models}
 \usage{
-fit_abc(
-  lf,
-  n_posterior = 300,
-  epsilon = NA,
-  keep = c("Y0", "Ys", "both", "none"),
-  target_acc = 0.1,
-  n_test = 100
-)
+fit_abc(lf, n_posterior = 300, epsilon = NA, keep = c("Y0", "Ys",
+  "both", "none"), target_acc = 0.1, n_test = 100)
 
 \method{summary}{fitted_abc}(fitted)
 }
@@ -28,9 +22,6 @@ fit_abc(
 \item{target_acc}{target acceptance rate}
 
 \item{n_test}{number of simulations for testing threshold}
-}
-\value{
-
 }
 \description{
 Approximate Bayesian Computation (ABC) for System dynamic models

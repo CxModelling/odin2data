@@ -13,9 +13,6 @@ compile_model_likefree(dat, sim)
 
 \item{y0}{initial values of the model}
 }
-\value{
-
-}
 \description{
 Compile a simulation model with a likelihood-free link to data
 }

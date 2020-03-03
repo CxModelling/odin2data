@@ -6,9 +6,6 @@
 \usage{
 fit()
 }
-\value{
-
-}
 \description{
 Title
 }

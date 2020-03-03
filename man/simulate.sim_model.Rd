@@ -12,9 +12,6 @@
 \arguments{
 \item{...}{}
 }
-\value{
-
-}
 \description{
 Simulate a single run
 }
