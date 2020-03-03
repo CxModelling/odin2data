@@ -35,13 +35,14 @@ abc_pmc <- function(lf, n_posterior, k = 5, keep = c("Y0", "Ys", "both", "none")
   eps <- sort(ds0)[n_posterior] + 1
   ess <- n_posterior
 
-  traj <- c(iter = 0, ess = ess, eps = eps, qt = 1/k, acc = 1/k, n = n_init)
+  traj <- c(round = 0, ess = ess, eps = eps, qt = 1/k, acc = 1/k, n = n_init)
 
   if (verbose) {
     cat("Round 0, ESS ", round(ess, 1), ", Epsilon ", eps, ", Acceptance ", round(100 * 1/k, 2), "%\n")
   }
 
   n_round <- 1
+  qt = 1
 
   while(n_round < max_round) {
     ##### Step 1+ -----
@@ -113,7 +114,6 @@ abc_pmc <- function(lf, n_posterior, k = 5, keep = c("Y0", "Ys", "both", "none")
   # Collect meta data ------------------------
   meta <- list(
     n_iter = n_posterior,
-    n_run = sum(traj[, "n"]),
     epsilon = eps,
     ess = ess,
     trajectory = traj
