@@ -40,8 +40,8 @@ library(odin2data)
 
 ## Example 1: model without warmup stage
 test_data <- data.frame(
-t = 1:5,
-incidence = c(20, 49, 109, 184, 206) / 1000
+  t = 1:5,
+  incidence = c(20, 49, 109, 184, 206) / 1000
 )
 
 ### Load the model file

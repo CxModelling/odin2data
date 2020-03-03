@@ -16,7 +16,8 @@ test_model(
   t_wp,
   m_wp,
   fn_pass_y0,
-  fn_check
+  fn_check,
+  method
 )
 
 compile_model(
@@ -31,6 +32,7 @@ compile_model(
   m_wp = m_sim,
   fn_pass_y0,
   fn_check,
+  method = NULL,
   max_attempt = 10
 )
 }
