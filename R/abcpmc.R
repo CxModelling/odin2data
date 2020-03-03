@@ -1,3 +1,10 @@
+weighted.sd <- function(x, wt) {
+  wt <- wt / sum(wt)
+  mu <- weighted.mean(x, wt)
+  tau <- sqrt(sum(wt * (x - mu) ^ 2))
+  tau
+}
+
 #' Title
 #'
 #' @param lf
@@ -13,7 +20,7 @@
 #' @export
 #'
 #' @examples
-abc_pmc <- function(lf, n_posterior, k = 5, keep = c("Y0", "Ys", "both", "none"), max_round = 20, q_stop = 0.99, verbose = T) {
+fit_abc_pmc <- function(lf, n_posterior, k = 5, keep = c("Y0", "Ys", "both", "none"), max_round = 20, q_stop = 0.99, verbose = T) {
   sim <- lf$Model
 
   keep <- match.arg(keep)
@@ -32,21 +39,24 @@ abc_pmc <- function(lf, n_posterior, k = 5, keep = c("Y0", "Ys", "both", "none")
   ds0 <- sapply(theta0, function(x) calc_dist(lf, pars = x))
   wts0 <- rep(1, n_posterior) / n_posterior
 
-  eps <- sort(ds0)[n_posterior] + 1
+  eps <- sort(ds0)[n_posterior + 1]
   ess <- n_posterior
+
+  theta0 <- theta0[order(ds0) <= n_posterior]
+  ds0 <- ds0[order(ds0) <= n_posterior]
 
   traj <- c(round = 0, ess = ess, eps = eps, qt = 1/k, acc = 1/k, n = n_init)
 
   if (verbose) {
-    cat("Round 0, ESS ", round(ess, 1), ", Epsilon ", eps, ", Acceptance ", round(100 * 1/k, 2), "%\n")
+    cat("Round ", 0, ", ESS ", round(ess, 1), ", Epsilon ", eps, ", Acceptance ", round(100 * 1/k, 2), "%\n")
   }
 
   n_round <- 1
-  qt = 1
+  qt = 1/k
 
-  while(n_round < max_round) {
+  while(n_round <= max_round) {
     ##### Step 1+ -----
-    tau <- sqrt(2 * diag(var(t(sapply(theta0, unlist)))))
+    tau <- apply(sapply(theta0, unlist), 1, weighted.sd, wt = wts0)
 
     theta1 <- list()
     ds1 <- rep(0, n_posterior)
@@ -60,7 +70,7 @@ abc_pmc <- function(lf, n_posterior, k = 5, keep = c("Y0", "Ys", "both", "none")
       dpr <- -Inf
       while (dj > eps) {
         n_try <- n_try + 1
-        the <- theta0[[sample(1:n_posterior, 1, prob = wts0)]]
+        the <- theta0[[sample.int(n_posterior, 1, prob = wts0)]]
         the_prop <- as.list(rnorm(length(the), unlist(the), tau))
         names(the_prop) <- names(the)
         dpr <- sim$d_prior(the_prop)
@@ -70,8 +80,6 @@ abc_pmc <- function(lf, n_posterior, k = 5, keep = c("Y0", "Ys", "both", "none")
         }
       }
 
-      phi <- sapply(theta0, function(x) sum(dnorm(unlist(x), mean = unlist(the_prop), sd = tau, log = T)))
-
       post <- list(Parameters = y_prop$Parameters, Distance = dj)
       if (keep_ys) {
         post$Ys <- y_prop$Ys
@@ -80,11 +88,14 @@ abc_pmc <- function(lf, n_posterior, k = 5, keep = c("Y0", "Ys", "both", "none")
       }
       posteriors[[j]] <- post
       theta1[[j]] <- the_prop
-      ds1[j] <- dj
-      wts1[j] <- exp(dpr - lse(log(wts0) + phi))
-    }
 
-    ess <- sum(wts1) ^2 / sum(wts1^2)
+      phi <- sapply(theta0, function(x) sum(dnorm(unlist(x), mean = unlist(the_prop), sd = tau, log = T)))
+      ds1[j] <- dj
+      wts1[j] <- dpr - lse(log(wts0) + phi)
+    }
+    wts1 <- exp(wts1 - lse(wts1))
+
+    ess <- sum(wts1) ^ 2 / sum(wts1^2)
     acc <- n_posterior / n_try
     traj <- rbind(traj, c(round = n_round, ess = ess, eps = eps, qt = qt, acc = acc, n = n_try))
 
@@ -104,7 +115,7 @@ abc_pmc <- function(lf, n_posterior, k = 5, keep = c("Y0", "Ys", "both", "none")
     ##### Go to next round -----
     theta0 <- theta1
     ds0 <- ds1
-    wts0 <- wts1
+    wts0 <- wts1 / sum(wts1)
 
     if (qt > q_stop & n_round >= 3) {
       break
@@ -133,7 +144,7 @@ abc_pmc <- function(lf, n_posterior, k = 5, keep = c("Y0", "Ys", "both", "none")
 }
 
 
-#' @rdname fit_abcpmc
+#' @rdname fit_abc_pmc
 #' @export
 summary.fitted_abcpmc <- function(fitted) {
   ans <- fitted$meta

@@ -36,7 +36,7 @@ calc_dist.sim_results <- function(rs, lf) {
   sel <- simulated[, 1] %in% lf$Ts2fit
   rows <- simulated[sel, 1]
   simulated <- simulated[sel, lf$Cols2fit]
-  dist <- - sum(dnorm(simulated, lf$Data[lf$Data[, 1] %in% rows, -1], log=T), na.rm = T)
+  dist <- sum((simulated - lf$Data[lf$Data[, 1] %in% rows, -1]) ^ 2)
   return(dist)
 }
 
