@@ -12,6 +12,7 @@ Encoding: UTF-8
 LazyData: true
 Import:
   odin
+  densratio
 RoxygenNote: 7.0.2
 Suggests: 
     testthat
