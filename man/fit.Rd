@@ -2,10 +2,13 @@
 % Please edit documentation in R/fit.R
 \name{fit}
 \alias{fit}
-\title{Title}
+\title{Fit simulation model to data with Likelihood-free methods}
 \usage{
-fit()
+fit(lf, n_posterior, method = c("abc", "abcsmc", "abcpmc"), ...)
+}
+\arguments{
+\item{...}{arguments for a specific method}
 }
 \description{
-Title
+Fit simulation model to data with Likelihood-free methods
 }

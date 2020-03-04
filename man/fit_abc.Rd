@@ -2,13 +2,10 @@
 % Please edit documentation in R/abc.R
 \name{fit_abc}
 \alias{fit_abc}
-\alias{summary.fitted_abc}
 \title{Approximate Bayesian Computation (ABC) for System dynamic models}
 \usage{
 fit_abc(lf, n_posterior = 300, epsilon = NA, keep = c("Y0", "Ys",
   "both", "none"), target_acc = 0.1, n_test = 100)
-
-\method{summary}{fitted_abc}(fitted)
 }
 \arguments{
 \item{lf}{a "model_likefree" object with a compile model and data}

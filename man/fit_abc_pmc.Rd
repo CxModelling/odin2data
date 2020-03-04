@@ -2,13 +2,10 @@
 % Please edit documentation in R/abcpmc.R
 \name{fit_abc_pmc}
 \alias{fit_abc_pmc}
-\alias{summary.fitted_abcpmc}
 \title{Title}
 \usage{
 fit_abc_pmc(lf, n_posterior, k = 5, keep = c("Y0", "Ys", "both",
   "none"), max_round = 20, q_stop = 0.99, verbose = T)
-
-\method{summary}{fitted_abcpmc}(fitted)
 }
 \arguments{
 \item{verbose}{}
