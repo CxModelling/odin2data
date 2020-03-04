@@ -16,6 +16,7 @@ calc_dist <- function(sim, pars, ...) {
 #' @rdname calc_dist
 #' @export
 calc_dist.sim_model <- function(sim, pars, dat) {
+  if (is.infinite(sim$d_prior(pars))) return(Inf)
   lf <- compile_model_likefree(dat, sim)
   return(calc_dist(lf, pars))
 }
@@ -25,6 +26,7 @@ calc_dist.sim_model <- function(sim, pars, dat) {
 #' @export
 calc_dist.sim_model_likefree <- function(lf, pars) {
   rs <- simulate(lf, pars = pars, warmup = lf$Model$WarmupStage == "Yes")
+  if (class(rs) != "sim_results") return(Inf)
   return(calc_dist(rs, lf))
 }
 

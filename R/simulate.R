@@ -18,7 +18,7 @@ simulate.sim_model <- function(sim, y0, pars, warmup = F, ...) {
     if (missing(y0)) {
       y0 <- sim$Y0_wp
     }
-    temp <- tryCatch({ warmup(sim, y0 = y0, pars = pars) }, error = function(e) "Warmup failed")
+    temp <- tryCatch({ warmup(sim, y0 = y0, pars = pars) }, error = function(e) e)
     if (class(temp) != "Y_eq") return(temp)
 
     pars <- temp$Parameters

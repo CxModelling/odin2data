@@ -41,15 +41,22 @@ fit_abc_smc <- function(lf, n_posterior, alpha = 0.9, keep = c("Y0", "Ys", "both
   d_0 <- rep(0, n_posterior)
 
   for (i in 1:n_posterior) {
-    theta_0[[i]] <- theta <- sim$r_prior()
-    y <- simulate(sim, pars = theta)
-    d_0[i] <- d <- calc_dist(y, lf)
+    d <- Inf
+    while(is.infinite(d)) {
+      theta <- sim$r_prior()
+      y <- tryCatch(simulate(sim, pars = theta), function(e) e)
+
+      if (class(y) != "sim_results") next
+      d <- calc_dist(y, lf)
+    }
 
     post <- list(Parameters = y$Parameters, Distance = d)
     if (keep_ys) post$Ys <- y$Ys
     if (keep_y0) post$Y0 <- y$Y0
 
     posteriors[[i]] <- post
+    theta_0[[i]] <- theta
+    d_0[i] <- d
   }
 
   wts <- rep(1, n_posterior) / n_posterior
