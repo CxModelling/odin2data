@@ -1,10 +1,3 @@
-weighted.sd <- function(x, wt) {
-  wt <- wt / sum(wt)
-  mu <- weighted.mean(x, wt)
-  tau <- sqrt(sum(wt * (x - mu) ^ 2))
-  tau
-}
-
 #' Title
 #'
 #' @param lf
@@ -134,34 +127,12 @@ fit_abc_pmc <- function(lf, n_posterior, k = 5, keep = c("Y0", "Ys", "both", "no
   pss <- t(pss)
 
   res <- list(
-    posteriors = posteriors,
-    parameters = pss,
-    meta = meta
+    Posteriors = posteriors,
+    Parameters = pss,
+    Meta = meta,
+    Data = lf$Data
   )
-  class(res) <- "fitted_abcpmc"
+  class(res) <- "posterior_likefree"
 
   return(res)
-}
-
-
-#' @rdname fit_abc_pmc
-#' @export
-summary.fitted_abcpmc <- function(fitted) {
-  ans <- fitted$meta
-
-  su <- apply(fitted$parameters, 2, function(ps) {
-    c(
-      mean(ps), sd(ps), min(ps),
-      quantile(ps, c(0.025, 0.25, 0.5, 0.75, 0.975)),
-      max(ps)
-    )
-  })
-
-  su <- t(su)
-
-  colnames(su)[c(1:3, 9)] <- c("Mean", "Std", "Min", "Max")
-
-  ans$Post <- su
-  class(ans) <- "summary.abcpmc"
-  return(ans)
 }

@@ -142,34 +142,12 @@ fit_abc <- function(lf, n_posterior = 300, epsilon = NA, keep = c("Y0", "Ys", "b
   pss <- t(pss)
 
   res <- list(
-    posteriors = posteriors,
-    parameters = pss,
-    meta = meta
+    Posteriors = posteriors,
+    Parameters = pss,
+    Meta = meta,
+    Data = lf$Data
   )
-  class(res) <- "fitted_abc"
+  class(res) <- "posterior_likefree"
 
   return(res)
-}
-
-
-#' @rdname fit_abc
-#' @export
-summary.fitted_abc <- function(fitted) {
-  ans <- fitted$meta
-
-  su <- apply(fitted$parameters, 2, function(ps) {
-    c(
-      mean(ps), sd(ps), min(ps),
-      quantile(ps, c(0.025, 0.25, 0.5, 0.75, 0.975)),
-      max(ps)
-    )
-  })
-
-  su <- t(su)
-
-  colnames(su)[c(1:3, 9)] <- c("Mean", "Std", "Min", "Max")
-
-  ans$Post <- su
-  class(ans) <- "summary.abc"
-  return(ans)
 }
