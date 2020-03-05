@@ -4,15 +4,8 @@
 \alias{fit_abc_smc}
 \title{Approximate Bayesian Computation Sequential Monte Carlo}
 \usage{
-fit_abc_smc(
-  lf,
-  n_posterior,
-  alpha = 0.9,
-  keep = c("Y0", "Ys", "both", "none"),
-  max_round = 20,
-  max_stay = 3,
-  verbose = T
-)
+fit_abc_smc(lf, n_posterior, alpha = 0.9, keep = c("Y0", "Ys", "both",
+  "none"), max_round = 20, max_stay = 3, verbose = T)
 }
 \arguments{
 \item{n_posterior}{number of posterior particles to collect}

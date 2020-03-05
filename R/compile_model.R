@@ -11,6 +11,7 @@ test_model <- function(d_prior, r_prior, y0, inp_sim, ts_sim, m_sim, inp_wp, t_w
   res$d_prior <- d_prior
   res$r_prior <- r_prior
 
+  if (is.null(method)) method = "rk4"
 
   if (missing(t_wp) | missing(m_wp) | missing(fn_pass_y0)) {
     res$WarmupStage <- "No"
@@ -29,15 +30,18 @@ test_model <- function(d_prior, r_prior, y0, inp_sim, ts_sim, m_sim, inp_wp, t_w
     cm_wp <- m_wp(user = pars)
     ts_wp <- ts_sim[1] - (t_wp:0)
 
-    st <- system.time({ ys0 <- cm_wp$run(ts_wp) })
+    st <- system.time({ ys0 <- cm_wp$run(ts_wp, method = method) })
     cat("Warm-up time:\n")
     print(st)
 
     ys0 <- ys0[ts_wp == round(ts_wp), ]
 
+    y0new <- array(ys0[nrow(ys0), 1 + 1:prod(dim(y0))], dim(y0))
+
     res <- c(res, list(
       Input_wp = inp_wp,
-      Y0_wp = y0,
+      dimY0_wp = dim(y0),
+      Y0_wp = y0new,
       Ys_wp = ys0,
       CM_wp = cm_wp,
       Time_wp = range(ts_wp),
@@ -62,7 +66,6 @@ test_model <- function(d_prior, r_prior, y0, inp_sim, ts_sim, m_sim, inp_wp, t_w
 
   cm_sim <- m_sim(user = pars)
 
-  if (is.null(method)) method = "rk4"
   st <- system.time({ ys1 <- cm_sim$run(ts_sim, method = method) })
   cat("Simulation time:\n")
   print(st)

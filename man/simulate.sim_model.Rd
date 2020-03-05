@@ -16,9 +16,6 @@
 
 \item{pars}{parameters in a list}
 }
-\value{
-
-}
 \description{
 Simulate a single run
 }

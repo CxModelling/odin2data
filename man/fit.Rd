@@ -9,9 +9,6 @@ fit(lf, n_posterior, method = c("abc", "abcsmc", "abcpmc"), ...)
 \arguments{
 \item{...}{arguments for a specific method}
 }
-\value{
-
-}
 \description{
 Fit simulation model to data with Likelihood-free methods
 }

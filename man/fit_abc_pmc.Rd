@@ -4,21 +4,11 @@
 \alias{fit_abc_pmc}
 \title{Title}
 \usage{
-fit_abc_pmc(
-  lf,
-  n_posterior,
-  k = 5,
-  keep = c("Y0", "Ys", "both", "none"),
-  max_round = 20,
-  q_stop = 0.99,
-  verbose = T
-)
+fit_abc_pmc(lf, n_posterior, k = 5, keep = c("Y0", "Ys", "both",
+  "none"), max_round = 20, q_stop = 0.99, verbose = T)
 }
 \arguments{
 \item{verbose}{}
-}
-\value{
-
 }
 \description{
 Title

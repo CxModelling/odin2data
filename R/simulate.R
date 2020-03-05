@@ -20,14 +20,12 @@ simulate.sim_model <- function(sim, y0, pars, warmup = T) {
       y0 <- sim$Y0_wp
     }
     temp <- tryCatch({ warmup(sim, y0 = y0, pars = pars) }, error = function(e) e$message)
-    stopifnot("Y_eq" %in% class(temp))
+    stopifnot(is.list(temp))
 
     pars <- temp$Parameters
     y0 <- temp$Y0
-  } else {
-    if (missing(y0)) {
-      y0 <- sim$Y0_sim
-    }
+  } else if (missing(y0)) {
+    y0 <- sim$Y0_sim
   }
 
   inp <- pars

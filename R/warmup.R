@@ -31,7 +31,7 @@ warmup.sim_model <- function(sim, y0, pars, times = sim$TS_wp) {
   cm_wp <- sim$CM_wp
   cm_wp$set_user(user = inp)
 
-  ys <- cm_wp$run(times)
+  ys <- cm_wp$run(times, method = sim$Method)
 
   if ("Checker" %in% names(sim)) {
     stopifnot(sim$Checker(ys))
