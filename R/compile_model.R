@@ -111,7 +111,7 @@ compile_model <- function(d_prior, r_prior, y0, inp_sim = NULL, ts_sim, m_sim, i
   while(T) {
     tested <- tryCatch({
       test_model(d_prior, r_prior, y0, inp_sim, ts_sim, m_sim, inp_wp, t_wp, m_wp, fn_pass_y0, fn_check, method)
-    }, error = function(e) e)
+    }, error = function(e) e$message)
 
 
     n_attempt <- n_attempt + 1

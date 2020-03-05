@@ -43,19 +43,18 @@ fit_abc_smc <- function(lf, n_posterior, alpha = 0.9, keep = c("Y0", "Ys", "both
   for (i in 1:n_posterior) {
     d <- Inf
     while(is.infinite(d)) {
-      theta <- sim$r_prior()
-      y <- tryCatch(simulate(sim, pars = theta), function(e) e)
+      rs <- a_sample(sim)
 
-      if (class(y) != "sim_results") next
-      d <- calc_dist(y, lf)
+      if (class(rs) != "sim_results") next
+      d <- calc_dist(rs, lf)
     }
 
-    post <- list(Parameters = y$Parameters, Distance = d)
-    if (keep_ys) post$Ys <- y$Ys
-    if (keep_y0) post$Y0 <- y$Y0
+    post <- list(Parameters = rs$Parameters, Distance = d)
+    if (keep_ys) post$Ys <- rs$Ys
+    if (keep_y0) post$Y0 <- rs$Y0
 
     posteriors[[i]] <- post
-    theta_0[[i]] <- theta
+    theta_0[[i]] <- rs$Parameters
     d_0[i] <- d
   }
 
@@ -100,7 +99,6 @@ fit_abc_smc <- function(lf, n_posterior, alpha = 0.9, keep = c("Y0", "Ys", "both
       theta_1 <- theta_0[re_index]
 
       posteriors <- posteriors[re_index]
-
 
       d_1 <- d_0[re_index]
       wts <- rep(1, n_posterior) / n_posterior

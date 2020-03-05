@@ -1,13 +1,14 @@
 #' Simulate a single run
 #'
-#' @param sim
-#' @param ...
+#' @param sim simulation model, sim_model
+#' @param y0 initial values
+#' @param pars parameters in a list
 #'
 #' @return
 #' @export
 #'
 #' @examples
-simulate.sim_model <- function(sim, y0, pars, warmup = F, ...) {
+simulate.sim_model <- function(sim, y0, pars, warmup = T) {
   if (missing(pars)) {
     pars <- sim$r_prior()
   }
@@ -35,7 +36,7 @@ simulate.sim_model <- function(sim, y0, pars, warmup = F, ...) {
   cm_sim <- sim$CM_sim
   cm_sim$set_user(user = inp)
 
-  st <- system.time({ ys <- cm_sim$run(sim$TS_sim, ...) })
+  st <- system.time({ ys <- cm_sim$run(sim$TS_sim, method = sim$Method) })
 
   res <- list(
     Y0 = y0,
@@ -50,6 +51,28 @@ simulate.sim_model <- function(sim, y0, pars, warmup = F, ...) {
 
 #' @rdname simulate.sim_model
 #' @export
-simulate.sim_model_likefree <- function(sim, y0, pars, warmup = F, ...) {
-  return(simulate(sim$Model, y0, pars, warmup, ...))
+simulate.sim_model_likefree <- function(sim, y0, pars, warmup = T) {
+  return(simulate(sim$Model, y0, pars, warmup))
+}
+
+
+a_sample <- function(sim, max_attempt = 100) {
+  n_attempt <- 0
+  while (T) {
+    rs <- tryCatch({
+      simulate(sim)
+    }, error = function(e) e$message)
+
+    if ("sim_results" %in% class(rs)) {
+      return (rs)
+    } else {
+      n_attempt <- n_attempt + 1
+    }
+    stopifnot(n_attempt <= max_attempt)
+  }
+}
+
+
+mutate_sample <- function(sim, pars, tau) {
+
 }
