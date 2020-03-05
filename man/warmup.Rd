@@ -15,9 +15,6 @@ warmup(sim, ...)
 \arguments{
 \item{...}{}
 }
-\value{
-
-}
 \description{
 Warming-up a model to a steady state
 }

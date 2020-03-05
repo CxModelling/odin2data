@@ -125,12 +125,21 @@ fit_abc_smc <- function(lf, n_posterior, alpha = 0.9, keep = c("Y0", "Ys", "both
       if (is.infinite(sim$d_prior(theta))) {
         d_p[i] <- Inf
       } else {
-        y <- simulate(sim, pars = theta)
-        d_p[i] <- d <- calc_dist(y, lf)
+        y <- tryCatch({
+          simulate(sim, pars = theta)
+        }, error = function(e) e$message)
+        if (is.list(y)) {
+          d <- calc_dist(y, lf)
+          post <- list(Parameters = theta, Distance = d)
+          if (keep_ys) post$Ys <- y$Ys
+          if (keep_y0) post$Y0 <- y$Y0
 
-        post <- list(Parameters = y$Parameters, Distance = d)
-        if (keep_ys) post$Ys <- y$Ys
-        if (keep_y0) post$Y0 <- y$Y0
+        } else {
+          d <- Inf
+          post <- list(Parameters = theta, Distance = d)
+        }
+        d_p[i] <- d
+
         y_p[[i]] <- post
         n_eval <- n_eval + 1
       }
