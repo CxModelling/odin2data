@@ -154,9 +154,11 @@ fit_abc_smc <- function(lf, n_posterior, alpha = 0.9, keep = c("Y0", "Ys", "both
 
     ## Update accepted proposals
     a <- runif(n_posterior) < acc
-    theta_1[a] <- theta_p[a]
-    d_1[a] <- d_p[a]
-    posteriors[a] <- y_p[a]
+    if (sum(a) > 0) {
+      theta_1[a] <- theta_p[a]
+      d_1[a] <- d_p[a]
+      posteriors[a] <- y_p[a]
+    }
 
     # Collect history
     traj <- rbind(traj,
