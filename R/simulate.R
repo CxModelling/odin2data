@@ -57,13 +57,14 @@ simulate.sim_model_likefree <- function(sim, y0, pars, warmup = T) {
 
 
 a_sample <- function(sim, max_attempt = 100) {
-  n_attempt <- 0
+  n_attempt <- 1
   while (T) {
     rs <- tryCatch({
       simulate(sim)
     }, error = function(e) e$message)
 
     if ("sim_results" %in% class(rs)) {
+      rs$N_attempt <- n_attempt
       return (rs)
     } else {
       n_attempt <- n_attempt + 1
@@ -73,6 +74,21 @@ a_sample <- function(sim, max_attempt = 100) {
 }
 
 
-mutate_sample <- function(sim, pars, tau) {
+mutate_sample <- function(sim, pars, tau, max_attempt = 100) {
+  n_attempt <- 1
+  while (T) {
+    prop <- as.list(pars + rnorm(length(pars), 0, tau))
 
+    rs <- tryCatch({
+      simulate(sim, pars = prop)
+    }, error = function(e) e$message)
+
+    if ("sim_results" %in% class(rs)) {
+      rs$N_attempt <- n_attempt
+      return (rs)
+    } else {
+      n_attempt <- n_attempt + 1
+    }
+    stopifnot(n_attempt <= max_attempt)
+  }
 }

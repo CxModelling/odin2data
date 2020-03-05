@@ -120,29 +120,18 @@ fit_abc_smc <- function(lf, n_posterior, alpha = 0.9, keep = c("Y0", "Ys", "both
 
     for (i in 1:n_posterior) {
       theta <- unlist(theta_1[[i]])
-      theta_p[[i]] <- theta <- as.list(theta + rnorm(length(theta), 0, tau))
-      theta
-      if (is.infinite(sim$d_prior(theta))) {
-        d_p[i] <- Inf
-      } else {
-        y <- tryCatch({
-          simulate(sim, pars = theta)
-        }, error = function(e) e$message)
-        if (is.list(y)) {
-          d <- calc_dist(y, lf)
-          post <- list(Parameters = theta, Distance = d)
-          if (keep_ys) post$Ys <- y$Ys
-          if (keep_y0) post$Y0 <- y$Y0
 
-        } else {
-          d <- Inf
-          post <- list(Parameters = theta, Distance = d)
-        }
-        d_p[i] <- d
+      rs <- mutate_sample(sim, theta, tau = tau)
 
-        y_p[[i]] <- post
-        n_eval <- n_eval + 1
-      }
+      theta_p[[i]] <- rs$Parameters
+      d_p[i] <- d <- calc_dist(rs, lf)
+
+      post <- list(Parameters = rs$Parameters, Distance = d)
+      if (keep_ys) post$Ys <- rs$Ys
+      if (keep_y0) post$Y0 <- rs$Y0
+
+      y_p[[i]] <- post
+      n_eval <- n_eval + rs$N_attempt
     }
 
     act_np_p <- (d_p < eps_1) + 0
