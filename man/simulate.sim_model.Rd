@@ -5,12 +5,19 @@
 \alias{simulate.sim_model_likefree}
 \title{Simulate a single run}
 \usage{
-\method{simulate}{sim_model}(sim, y0, pars, warmup = F, ...)
+\method{simulate}{sim_model}(sim, y0, pars, warmup = T)
 
-\method{simulate}{sim_model_likefree}(sim, y0, pars, warmup = F, ...)
+\method{simulate}{sim_model_likefree}(sim, y0, pars, warmup = T)
 }
 \arguments{
-\item{...}{}
+\item{sim}{simulation model, sim_model}
+
+\item{y0}{initial values}
+
+\item{pars}{parameters in a list}
+}
+\value{
+
 }
 \description{
 Simulate a single run
