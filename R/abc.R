@@ -3,7 +3,6 @@
 #' @param lf a "model_likefree" object with a compile model and data
 #' @param n_posterior number of posteriors to collect
 #' @param epsilon threshold for collecting
-#' @param keep simulation results to keep; "Y0": initial values, "Ys": trajectories, "both": both, "none": none
 #' @param target_acc target acceptance rate
 #' @param n_test number of simulations for testing threshold
 #'
@@ -66,13 +65,8 @@
 #' post <- odin2data::fit_abc(lf, 100, target_acc = 0.2)
 #' summary(post)
 #'
-fit_abc <- function(lf, n_posterior = 300, epsilon = NA, keep = c("Y0", "Ys", "both", "none"),
-                    target_acc = 0.1, n_test = 100) {
+fit_abc <- function(lf, n_posterior = 300, epsilon = NA, target_acc = 0.1, n_test = 100) {
   sim <- lf$Model
-
-  keep <- match.arg(keep)
-  keep_y0 <- keep %in% c("Y0", "both")
-  keep_ys <- keep %in% c("Ys", "both")
 
   # Finding epsilon --------------------------
   if (is.na(epsilon)) {
@@ -112,22 +106,12 @@ fit_abc <- function(lf, n_posterior = 300, epsilon = NA, keep = c("Y0", "Ys", "b
     if (dist < epsilon) {
       n_collected <- n_collected + 1
 
-      posterior <- list(
-        parameters = pars,
-        distance = dist
-      )
-
-      if (keep_ys) {
-        posterior$Ys <- res$Ys
-      }
-      if (keep_y0) {
-        posterior$Y0 <- res$Y0
-      }
-      posteriors[[n_collected]] <- posterior
+      res$Distance <- dist
+      posteriors[[n_collected]] <- res
     }
   }
 
-  lis <- - sapply(posteriors, function(x) x$distance)
+  lis <- - sapply(posteriors, function(x) x$Distance)
 
   # Collect meta data ------------------------
   meta <- list(
@@ -138,7 +122,7 @@ fit_abc <- function(lf, n_posterior = 300, epsilon = NA, keep = c("Y0", "Ys", "b
     ess = ess(lis)
   )
 
-  pss <- sapply(posteriors, function(x) unlist(x$parameters))
+  pss <- sapply(posteriors, function(x) unlist(x$Parameters))
   pss <- t(pss)
 
   res <- list(

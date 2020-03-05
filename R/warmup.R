@@ -37,9 +37,18 @@ warmup.sim_model <- function(sim, y0, pars, times = sim$TS_wp) {
     stopifnot(sim$Checker(ys))
   }
 
-  y0 = sim$Linker(ys)
+  if (is.array(y0)) {
+    dim0 <- dim(y0)
+    y1 <- array(ys[nrow(ys), 1 + 1:prod(dim0)], dim0)
+  } else if (is.vector(y0)) {
+    y1 <- ys[nrow(ys), 1 + 1:length(y0)]
+  }
+
+
+  y0 <- sim$Linker(ys)
 
   res <- list(
+    Yend = y1,
     Y0 = y0,
     Parameters = pars
   )
@@ -54,5 +63,5 @@ warmup.sim_model <- function(sim, y0, pars, times = sim$TS_wp) {
 #' @export
 update.Y_eq <- function(yeq, sim, nforward = length(sim$TS_wp)) {
   times <- sim$Time_wp[2] - nforward:0
-  return(warmup(sim, y0 = yeq$Y0, pars = yeq$Parameters, times = times))
+  return(warmup(sim, y0 = yeq$Yend, pars = yeq$Parameters, times = times))
 }

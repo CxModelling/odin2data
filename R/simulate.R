@@ -42,6 +42,10 @@ simulate.sim_model <- function(sim, y0, pars, warmup = T) {
     Ys = ys,
     ProcTime = st
   )
+  if (warmup & sim$WarmupStage == "Yes") {
+    res$Y1wp <- temp$Yend
+  }
+
   class(res) <- "sim_results"
   return(res)
 }
@@ -72,20 +76,28 @@ a_sample <- function(sim, max_attempt = 100) {
 }
 
 
-mutate_sample <- function(sim, pars, tau, max_attempt = 100) {
-  n_attempt <- 1
+mutate_sample <- function(sim, ptc, tau, max_attempt = 100) {
+  n_attempt <- 0
+
+  pars <- ptc$Parameters
+  if (sim$WarmupStage == "Yes") {
+    y0 <- ptc$Y1wp
+  } else {
+    y0 <- sim$Y0_sim
+  }
+
   while (T) {
-    prop <- as.list(pars + rnorm(length(pars), 0, tau))
+    n_attempt <- n_attempt + 1
+
+    prop <- as.list(unlist(pars) + rnorm(length(pars), 0, tau))
 
     rs <- tryCatch({
-      simulate(sim, pars = prop)
+      simulate(sim, y0 = y0, pars = prop)
     }, error = function(e) e$message)
 
     if ("sim_results" %in% class(rs)) {
       rs$N_attempt <- n_attempt
       return (rs)
-    } else {
-      n_attempt <- n_attempt + 1
     }
     stopifnot(n_attempt <= max_attempt)
   }

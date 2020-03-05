@@ -23,14 +23,8 @@ find_eps <- function(ds, eps0, alpha) {
 #' @export
 #'
 #' @examples
-fit_abc_smc <- function(lf, n_posterior, alpha = 0.9, keep = c("Y0", "Ys", "both", "none"),
-                        max_round = 20, max_stay = 3, verbose = T) {
-
-  keep <- match.arg(keep)
-  keep_y0 <- keep %in% c("Y0", "both")
-  keep_ys <- keep %in% c("Ys", "both")
-
-  thresh_ess <- n_posterior * 0.6
+fit_abc_smc <- function(lf, n_posterior, alpha = 0.9, p_thres = 0.6, max_round = 20, max_stay = 3, verbose = T) {
+  ess_thres <- n_posterior * p_thres
 
   # initialization
   if (verbose) {
@@ -49,11 +43,7 @@ fit_abc_smc <- function(lf, n_posterior, alpha = 0.9, keep = c("Y0", "Ys", "both
       d <- calc_dist(rs, lf)
     }
 
-    post <- list(Parameters = rs$Parameters, Distance = d)
-    if (keep_ys) post$Ys <- rs$Ys
-    if (keep_y0) post$Y0 <- rs$Y0
-
-    posteriors[[i]] <- post
+    posteriors[[i]] <- rs
     theta_0[[i]] <- rs$Parameters
     d_0[i] <- d
   }
@@ -91,7 +81,7 @@ fit_abc_smc <- function(lf, n_posterior, alpha = 0.9, keep = c("Y0", "Ys", "both
     wts <- wts / sum(wts)
 
     # Step 2 resampling
-    if (thresh_ess * sum(wts ^2) > 1) {
+    if (ess_thres * sum(wts ^2) > 1) {
       stopifnot(sum(wts > 0) > 2)
       alive <- wts > 0
       ind <- (1:n_posterior)[alive]
@@ -119,18 +109,14 @@ fit_abc_smc <- function(lf, n_posterior, alpha = 0.9, keep = c("Y0", "Ys", "both
     d_p <- rep(0, n_posterior)
 
     for (i in 1:n_posterior) {
-      theta <- unlist(theta_1[[i]])
-
-      rs <- mutate_sample(sim, theta, tau = tau)
+      rs <- mutate_sample(sim, posteriors[[i]], tau = tau)
 
       theta_p[[i]] <- rs$Parameters
       d_p[i] <- d <- calc_dist(rs, lf)
 
-      post <- list(Parameters = rs$Parameters, Distance = d)
-      if (keep_ys) post$Ys <- rs$Ys
-      if (keep_y0) post$Y0 <- rs$Y0
+      rs$Distance <- d
 
-      y_p[[i]] <- post
+      y_p[[i]] <- rs
       n_eval <- n_eval + rs$N_attempt
     }
 
@@ -143,7 +129,7 @@ fit_abc_smc <- function(lf, n_posterior, alpha = 0.9, keep = c("Y0", "Ys", "both
 
     ## Update accepted proposals
     a <- runif(n_posterior) < acc
-    if (sum(a) > 0) {
+    if (sum(a) > 2) {
       theta_1[a] <- theta_p[a]
       d_1[a] <- d_p[a]
       posteriors[a] <- y_p[a]

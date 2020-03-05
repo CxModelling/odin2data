@@ -36,7 +36,12 @@ test_model <- function(d_prior, r_prior, y0, inp_sim, ts_sim, m_sim, inp_wp, t_w
 
     ys0 <- ys0[ts_wp == round(ts_wp), ]
 
-    y0new <- array(ys0[nrow(ys0), 1 + 1:prod(dim(y0))], dim(y0))
+    if (is.array(y0)) {
+      dim0 <- dim(y0)
+      y0new <- array(ys0[nrow(ys0), 1 + 1:prod(dim0)], dim0)
+    } else if (is.vector(y0)) {
+      y0new <- ys0[nrow(ys0), 1 + 1:length(y0)]
+    }
 
     res <- c(res, list(
       Input_wp = inp_wp,
