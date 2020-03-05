@@ -18,6 +18,9 @@ calc_dist(sim, pars, ...)
 \arguments{
 \item{...}{}
 }
+\value{
+
+}
 \description{
 Calculate the distance between data and simulated dynamics
 }
