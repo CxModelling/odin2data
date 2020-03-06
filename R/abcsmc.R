@@ -12,12 +12,14 @@ find_eps <- function(ds, eps0, alpha) {
 
 #' Approximate Bayesian Computation Sequential Monte Carlo
 #'
-#' @param lf
+#' @param lf a sim_model_likefree object
 #' @param n_posterior number of posterior particles to collect
 #' @param alpha percentage particles surviving
+#' @param p_thres proportion of threshold population
 #' @param keep keep simulation (Ys), intial values (Y0), or both
-#' @param max_round
-#' @param verbose
+#' @param max_round max round, reach to stop
+#' @param max_stay max staying round of epsilon, reach to stop
+#' @param verbose show log or not
 #'
 #' @references Del Moral, P., Doucet, A., & Jasra, A. (2012). An adaptive sequential Monte Carlo method for approximate Bayesian computation. Statistics and Computing, 22(5), 1009-1020.
 #' @export

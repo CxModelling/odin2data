@@ -4,8 +4,8 @@
 \alias{fit_abc}
 \title{Approximate Bayesian Computation (ABC) for System dynamic models}
 \usage{
-fit_abc(lf, n_posterior = 300, epsilon = NA, keep = c("Y0", "Ys",
-  "both", "none"), target_acc = 0.1, n_test = 100)
+fit_abc(lf, n_posterior = 300, epsilon = NA, target_acc = 0.1,
+  n_test = 100)
 }
 \arguments{
 \item{lf}{a "model_likefree" object with a compile model and data}
@@ -13,8 +13,6 @@ fit_abc(lf, n_posterior = 300, epsilon = NA, keep = c("Y0", "Ys",
 \item{n_posterior}{number of posteriors to collect}
 
 \item{epsilon}{threshold for collecting}
-
-\item{keep}{simulation results to keep; "Y0": initial values, "Ys": trajectories, "both": both, "none": none}
 
 \item{target_acc}{target acceptance rate}
 

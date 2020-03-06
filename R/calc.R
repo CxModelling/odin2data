@@ -1,14 +1,14 @@
 #' Calculate the distance between data and simulated dynamics
 #'
-#' @param sim
-#' @param pars
-#' @param ...
+#' @param sim a sim_model object
+#' @param lf a sim_model_likefree object
+#' @param pars parameter set
 #'
 #' @return
 #' @export
 #'
 #' @examples
-calc_dist <- function(sim, pars, ...) {
+calc_dist <- function(sim, pars) {
   UseMethod("calc_dist", sim)
 }
 

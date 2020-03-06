@@ -1,8 +1,8 @@
 #' Fit simulation model to data with Likelihood-free methods
 #'
-#' @param lf
-#' @param n_posterior
-#' @param method
+#' @param lf a sim_model_likefree object
+#' @param n_posterior number of posterior particles to collect
+#' @param method algorithm for model fitting
 #' @param ... arguments for a specific method
 #'
 #' @return

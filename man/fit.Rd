@@ -7,6 +7,12 @@
 fit(lf, n_posterior, method = c("abc", "abcsmc", "abcpmc"), ...)
 }
 \arguments{
+\item{lf}{a sim_model_likefree object}
+
+\item{n_posterior}{number of posterior particles to collect}
+
+\item{method}{algorithm for model fitting}
+
 \item{...}{arguments for a specific method}
 }
 \description{

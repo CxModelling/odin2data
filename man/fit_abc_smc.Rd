@@ -4,17 +4,25 @@
 \alias{fit_abc_smc}
 \title{Approximate Bayesian Computation Sequential Monte Carlo}
 \usage{
-fit_abc_smc(lf, n_posterior, alpha = 0.9, keep = c("Y0", "Ys", "both",
-  "none"), max_round = 20, max_stay = 3, verbose = T)
+fit_abc_smc(lf, n_posterior, alpha = 0.9, p_thres = 0.6,
+  max_round = 20, max_stay = 3, verbose = T)
 }
 \arguments{
+\item{lf}{a sim_model_likefree object}
+
 \item{n_posterior}{number of posterior particles to collect}
 
 \item{alpha}{percentage particles surviving}
 
-\item{keep}{keep simulation (Ys), intial values (Y0), or both}
+\item{p_thres}{proportion of threshold population}
 
-\item{verbose}{}
+\item{max_round}{max round, reach to stop}
+
+\item{max_stay}{max staying round of epsilon, reach to stop}
+
+\item{verbose}{show log or not}
+
+\item{keep}{keep simulation (Ys), intial values (Y0), or both}
 }
 \description{
 Approximate Bayesian Computation Sequential Monte Carlo

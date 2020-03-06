@@ -7,7 +7,7 @@
 \alias{calc_dist.sim_results}
 \title{Calculate the distance between data and simulated dynamics}
 \usage{
-calc_dist(sim, pars, ...)
+calc_dist(sim, pars)
 
 \method{calc_dist}{sim_model}(sim, pars, dat)
 
@@ -16,7 +16,11 @@ calc_dist(sim, pars, ...)
 \method{calc_dist}{sim_results}(rs, lf)
 }
 \arguments{
-\item{...}{}
+\item{sim}{a sim_model object}
+
+\item{pars}{parameter set}
+
+\item{lf}{a sim_model_likefree object}
 }
 \description{
 Calculate the distance between data and simulated dynamics
