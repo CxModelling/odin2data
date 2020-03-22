@@ -25,7 +25,9 @@ calc_dist.sim_model <- function(sim, pars, dat) {
 #' @rdname calc_dist
 #' @export
 calc_dist.sim_model_likefree <- function(lf, pars) {
-  rs <- simulate(lf, pars = pars, warmup = lf$Model$WarmupStage == "Yes")
+  rs <- tryCatch({
+    simulate(lf, pars = pars, warmup = lf$Model$WarmupStage == "Yes")
+  }, error = function(e) e$message)
   if (class(rs) != "sim_results") return(Inf)
   return(calc_dist(rs, lf))
 }

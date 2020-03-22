@@ -76,8 +76,9 @@ a_sample <- function(sim, max_attempt = 100) {
 }
 
 
-mutate_sample <- function(sim, ptc, tau, max_attempt = 100) {
+mutate_sample <- function(sim, ptc, tau, max_attempt = 100, max_move = 1000) {
   n_attempt <- 0
+  n_move <- 0
 
   pars <- ptc$Parameters
   if (sim$WarmupStage == "Yes") {
@@ -87,10 +88,19 @@ mutate_sample <- function(sim, ptc, tau, max_attempt = 100) {
   }
 
   while (T) {
+    n_move <- n_move + 1
+    prop <- lapply(1:length(pars), function(i) {
+      p <- pars[[i]]
+      sig <- tau[i]
+      p + rnorm(length(p), 0, sig)
+    })
+    names(prop) <- names(pars)
+
+    if (is.infinite(sim$d_prior(prop))) {
+      next
+    }
+
     n_attempt <- n_attempt + 1
-
-    prop <- as.list(unlist(pars) + rnorm(length(pars), 0, tau))
-
     rs <- tryCatch({
       simulate(sim, y0 = y0, pars = prop)
     }, error = function(e) e$message)
@@ -100,5 +110,6 @@ mutate_sample <- function(sim, ptc, tau, max_attempt = 100) {
       return (rs)
     }
     stopifnot(n_attempt <= max_attempt)
+    stopifnot(n_move <= max_move)
   }
 }

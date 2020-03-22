@@ -27,6 +27,7 @@ find_eps <- function(ds, eps0, alpha) {
 #' @examples
 fit_abc_smc <- function(lf, n_posterior, alpha = 0.9, p_thres = 0.6, max_round = 20, max_stay = 3, verbose = T) {
   ess_thres <- n_posterior * p_thres
+  sim <- lf$Model
 
   # initialization
   if (verbose) {
