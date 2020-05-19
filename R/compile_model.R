@@ -1,7 +1,7 @@
 #' @rdname compile_model
 #' @export
-test_model <- function(d_prior, r_prior, y0, inp_sim, ts_sim, m_sim, r_sto_sim,
-                       inp_wp, t_wp, m_wp, r_sto_wp, fn_pass_y0, fn_check, method) {
+test_model <- function(d_prior, r_prior, y0, inp_sim = NULL, ts_sim, m_sim, r_sto_sim,
+                       inp_wp = NULL, t_wp, m_wp, r_sto_wp, fn_pass_y0, fn_check, method) {
   res <- list()
 
   fp <- r_prior()
@@ -15,14 +15,14 @@ test_model <- function(d_prior, r_prior, y0, inp_sim, ts_sim, m_sim, r_sto_sim,
   if (is.null(method)) method = "rk4"
 
   if (missing(r_sto_sim)) {
-    r_sto_sim <- function(pars, inp) {
-      c(pars, inp)
+    r_sto_sim <- function(pars, inp=NULL) {
+      NULL
     }
   }
 
   if (missing(r_sto_wp)) {
-    r_sto_wp <- function(pars, inp) {
-      c(pars, inp)
+    r_sto_wp <- function(pars, inp=NULL) {
+      NULL
     }
   }
 
@@ -32,15 +32,12 @@ test_model <- function(d_prior, r_prior, y0, inp_sim, ts_sim, m_sim, r_sto_sim,
     res$WarmupStage <- "Yes"
 
     pars <- fp
-    if (!missing(inp_wp) & !any(is.null(inp_wp))) {
-      if (!any(is.null(inp_wp))) {
-        pars <- r_sto_wp(pars, inp_wp)
-      } else {
-        pars <- r_sto_wp(pars, NULL)
-      }
-    } else {
+    if (missing(inp_wp) | any(is.null(inp_wp))) {
       inp_wp <- NULL
     }
+
+    sto <- r_sto_wp(pars, inp_wp)
+    pars <- c(pars, sto, inp_wp)
 
     pars$Y0 <- y0
 
@@ -80,16 +77,15 @@ test_model <- function(d_prior, r_prior, y0, inp_sim, ts_sim, m_sim, r_sto_sim,
   }
 
   pars <- fp
-  if (!missing(inp_sim)) {
-    if (!any(is.null(inp_sim))) {
-      pars <- r_sto_sim(pars, inp_sim)
-    } else {
-      pars <- r_sto_sim(pars, NULL)
-    }
 
-  } else {
+  if (missing(inp_sim) | any(is.null(inp_sim))) {
     inp_sim <- NULL
   }
+  if (res$WarmupStage == "No" | !identical(r_sto_sim, r_sto_wp)) {
+    sto <- r_sto_sim(pars, inp_sim)
+  }
+  pars <- c(pars, sto, inp_sim)
+
   pars$Y0 <- y0
 
   cm_sim <- m_sim(user = pars)

@@ -22,13 +22,20 @@ simulate.sim_model <- function(sim, y0, pars, warmup = T) {
     temp <- tryCatch({ warmup(sim, y0 = y0, pars = pars) }, error = function(e) e$message)
     stopifnot(is.list(temp))
 
-    pars <- temp$Parameters
+    if (identical(sim$r_sto_sim, sim$r_sto_wp)) {
+      sto <- temp$Sto
+    } else {
+      sto <- sim$r_sto_sim(pars, sim$Input_sim)
+    }
     y0 <- temp$Y0
   } else if (missing(y0)) {
+    sto <- sim$r_sto_sim(pars, sim$Input_sim)
     y0 <- sim$Y0_sim
+  } else {
+    sto <- sim$r_sto_sim(pars, sim$Input_sim)
   }
 
-  inp <- sim$r_sto_sim(pars, sim$Input_sim)
+  inp <- c(pars, sto, sim$Input_sim)
   inp$Y0 <- y0
 
   cm_sim <- sim$CM_sim
