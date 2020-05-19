@@ -3,11 +3,14 @@
 \name{simulate.sim_model}
 \alias{simulate.sim_model}
 \alias{simulate.sim_model_likefree}
+\alias{simulate.sim_model_likelihood}
 \title{Simulate a single run}
 \usage{
 \method{simulate}{sim_model}(sim, y0, pars, warmup = T)
 
 \method{simulate}{sim_model_likefree}(sim, y0, pars, warmup = T)
+
+\method{simulate}{sim_model_likelihood}(sim, y0, pars, warmup = T)
 }
 \arguments{
 \item{sim}{simulation model, sim_model}
@@ -15,6 +18,9 @@
 \item{y0}{initial values}
 
 \item{pars}{parameters in a list}
+}
+\value{
+
 }
 \description{
 Simulate a single run

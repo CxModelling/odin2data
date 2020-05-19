@@ -28,7 +28,7 @@ simulate.sim_model <- function(sim, y0, pars, warmup = T) {
     y0 <- sim$Y0_sim
   }
 
-  inp <- pars
+  inp <- sim$r_sto_sim(pars, sim$Input_sim)
   inp$Y0 <- y0
 
   cm_sim <- sim$CM_sim
@@ -54,6 +54,13 @@ simulate.sim_model <- function(sim, y0, pars, warmup = T) {
 #' @rdname simulate.sim_model
 #' @export
 simulate.sim_model_likefree <- function(sim, y0, pars, warmup = T) {
+  return(simulate(sim$Model, y0, pars, warmup))
+}
+
+
+#' @rdname simulate.sim_model
+#' @export
+simulate.sim_model_likelihood <- function(sim, y0, pars, warmup = T) {
   return(simulate(sim$Model, y0, pars, warmup))
 }
 

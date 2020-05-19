@@ -5,12 +5,40 @@
 \alias{compile_model}
 \title{Compile a simulation model given all components}
 \usage{
-test_model(d_prior, r_prior, y0, inp_sim, ts_sim, m_sim, inp_wp, t_wp,
-  m_wp, fn_pass_y0, fn_check, method)
+test_model(
+  d_prior,
+  r_prior,
+  y0,
+  inp_sim,
+  ts_sim,
+  m_sim,
+  r_sto_sim,
+  inp_wp,
+  t_wp,
+  m_wp,
+  r_sto_wp,
+  fn_pass_y0,
+  fn_check,
+  method
+)
 
-compile_model(d_prior, r_prior, y0, inp_sim = NULL, ts_sim, m_sim,
-  inp_wp = NULL, t_wp, m_wp = m_sim, fn_pass_y0, fn_check,
-  method = NULL, max_attempt = 10)
+compile_model(
+  d_prior,
+  r_prior,
+  y0,
+  inp_sim = NULL,
+  ts_sim,
+  m_sim,
+  r_sto_sim,
+  inp_wp = NULL,
+  t_wp,
+  m_wp = m_sim,
+  r_sto_wp = NULL,
+  fn_pass_y0,
+  fn_check,
+  method = NULL,
+  max_attempt = 10
+)
 }
 \arguments{
 \item{d_prior}{a probability density function supporting prior distributions}
@@ -25,15 +53,22 @@ compile_model(d_prior, r_prior, y0, inp_sim = NULL, ts_sim, m_sim,
 
 \item{m_sim}{an odin model for simulation}
 
+\item{r_sto_sim}{a function of (prior, input) for generating internal stochasticity or modifying input}
+
 \item{inp_wp}{input data for the warm-up stage}
 
 \item{t_wp}{length of warm-up stage}
 
-\item{m_wp}{an odin model for waru-up}
+\item{m_wp}{an odin model for warm-up}
+
+\item{r_sto_wp}{a function of (prior, input) for generating internal stochasticity or modifying input for the warm-up stage}
 
 \item{fn_pass_y0}{a function for bringing the states at the end of warm-up to simulation initials}
 
 \item{fn_check}{a function for checking if a parameter set can generate validated output}
+}
+\value{
+
 }
 \description{
 Compile a simulation model given all components

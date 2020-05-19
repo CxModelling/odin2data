@@ -1,6 +1,7 @@
 #' @rdname compile_model
 #' @export
-test_model <- function(d_prior, r_prior, y0, inp_sim, ts_sim, m_sim, inp_wp, t_wp, m_wp, fn_pass_y0, fn_check, method) {
+test_model <- function(d_prior, r_prior, y0, inp_sim, ts_sim, m_sim, r_sto_sim,
+                       inp_wp, t_wp, m_wp, r_sto_wp, fn_pass_y0, fn_check, method) {
   res <- list()
 
   fp <- r_prior()
@@ -13,6 +14,18 @@ test_model <- function(d_prior, r_prior, y0, inp_sim, ts_sim, m_sim, inp_wp, t_w
 
   if (is.null(method)) method = "rk4"
 
+  if (missing(r_sto_sim)) {
+    r_sto_sim <- function(pars, inp) {
+      c(pars, inp)
+    }
+  }
+
+  if (missing(r_sto_wp)) {
+    r_sto_wp <- function(pars, inp) {
+      c(pars, inp)
+    }
+  }
+
   if (missing(t_wp) | missing(m_wp) | missing(fn_pass_y0)) {
     res$WarmupStage <- "No"
   } else {
@@ -20,7 +33,11 @@ test_model <- function(d_prior, r_prior, y0, inp_sim, ts_sim, m_sim, inp_wp, t_w
 
     pars <- fp
     if (!missing(inp_wp) & !any(is.null(inp_wp))) {
-      pars <- c(inp_wp, pars)
+      if (!any(is.null(inp_wp))) {
+        pars <- r_sto_wp(pars, inp_wp)
+      } else {
+        pars <- r_sto_wp(pars, NULL)
+      }
     } else {
       inp_wp <- NULL
     }
@@ -49,8 +66,9 @@ test_model <- function(d_prior, r_prior, y0, inp_sim, ts_sim, m_sim, inp_wp, t_w
       Y0_wp = y0new,
       Ys_wp = ys0,
       CM_wp = cm_wp,
+      r_sto_wp = r_sto_wp,
       Time_wp = range(ts_wp),
-      TS_wp = ts_wp
+      TS_wp = ts_wp,
     ))
 
     if(!missing(fn_check)) {
@@ -62,8 +80,13 @@ test_model <- function(d_prior, r_prior, y0, inp_sim, ts_sim, m_sim, inp_wp, t_w
   }
 
   pars <- fp
-  if (!missing(inp_sim) & !any(is.null(inp_sim))) {
-    pars <- c(inp_sim, pars)
+  if (!missing(inp_sim)) {
+    if (!any(is.null(inp_sim))) {
+      pars <- r_sto_sim(pars, inp_sim)
+    } else {
+      pars <- r_sto_sim(pars, NULL)
+    }
+
   } else {
     inp_sim <- NULL
   }
@@ -82,6 +105,7 @@ test_model <- function(d_prior, r_prior, y0, inp_sim, ts_sim, m_sim, inp_wp, t_w
     Y0_sim = y0,
     Ys_sim = ys1,
     CM_sim = cm_sim,
+    r_sto_sim = r_sto_sim,
     Time_sim = range(ts_sim),
     TS_sim = ts_sim,
     Method = method
@@ -98,9 +122,11 @@ test_model <- function(d_prior, r_prior, y0, inp_sim, ts_sim, m_sim, inp_wp, t_w
 #' @param inp_sim input data for the simulation stage
 #' @param ts_sim timespan for simulation
 #' @param m_sim an odin model for simulation
+#' @param r_sto_sim a function of (prior, input) for generating internal stochasticity or modifying input
 #' @param inp_wp input data for the warm-up stage
 #' @param t_wp length of warm-up stage
-#' @param m_wp an odin model for waru-up
+#' @param m_wp an odin model for warm-up
+#' @param r_sto_wp a function of (prior, input) for generating internal stochasticity or modifying input for the warm-up stage
 #' @param fn_pass_y0 a function for bringing the states at the end of warm-up to simulation initials
 #' @param fn_check a function for checking if a parameter set can generate validated output
 #'
@@ -108,7 +134,9 @@ test_model <- function(d_prior, r_prior, y0, inp_sim, ts_sim, m_sim, inp_wp, t_w
 #' @export
 #'
 #' @examples
-compile_model <- function(d_prior, r_prior, y0, inp_sim = NULL, ts_sim, m_sim, inp_wp = NULL, t_wp, m_wp = m_sim,
+compile_model <- function(d_prior, r_prior, y0,
+                          inp_sim = NULL, ts_sim, m_sim, r_sto_sim,
+                          inp_wp = NULL, t_wp, m_wp = m_sim, r_sto_wp = NULL,
                           fn_pass_y0, fn_check, method = NULL, max_attempt = 10) {
   n_attempt <- 0
 
@@ -118,7 +146,8 @@ compile_model <- function(d_prior, r_prior, y0, inp_sim = NULL, ts_sim, m_sim, i
 
   while(T) {
     tested <- tryCatch({
-      test_model(d_prior, r_prior, y0, inp_sim, ts_sim, m_sim, inp_wp, t_wp, m_wp, fn_pass_y0, fn_check, method)
+      test_model(d_prior, r_prior, y0, inp_sim, ts_sim, m_sim, r_sto_sim,
+                 inp_wp, t_wp, m_wp, r_sto_wp, fn_pass_y0, fn_check, method)
     }, error = function(e) e$message)
 
 
@@ -136,12 +165,9 @@ compile_model <- function(d_prior, r_prior, y0, inp_sim = NULL, ts_sim, m_sim, i
 #'
 #' @param dat a dataframe of data to be fitted, "t" as the indicator of time
 #' @param sim a compile model, see compile_model
-#' @param y0 initial values of the model
 #'
-#' @return
+#' @return a compiled model with data
 #' @export
-#'
-#' @examples
 compile_model_likefree <- function(dat, sim) {
 
   vars <- intersect(colnames(sim$Ys_sim), colnames(dat))
@@ -155,5 +181,24 @@ compile_model_likefree <- function(dat, sim) {
   )
 
   class(res) <- "sim_model_likefree"
+  return(res)
+}
+
+
+#' Compile a simulation model with a likelihood function to data
+#'
+#' @param sim a compile model, see compile_model
+#' @param fn_like likelihood function
+#'
+#' @return a compiled model with likelihood function
+#' @export
+compile_model_likelihood <- function(fn_like, sim) {
+
+  res <- list(
+    Model = sim,
+    FnLike = fn_like
+  )
+
+  class(res) <- "sim_model_likelihood"
   return(res)
 }

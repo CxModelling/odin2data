@@ -4,6 +4,7 @@
 \alias{calc_dist}
 \alias{calc_dist.sim_model}
 \alias{calc_dist.sim_model_likefree}
+\alias{calc_dist.sim_model_likelihood}
 \alias{calc_dist.sim_results}
 \title{Calculate the distance between data and simulated dynamics}
 \usage{
@@ -13,6 +14,8 @@ calc_dist(sim, pars)
 
 \method{calc_dist}{sim_model_likefree}(lf, pars)
 
+\method{calc_dist}{sim_model_likelihood}(lik, pars)
+
 \method{calc_dist}{sim_results}(rs, lf)
 }
 \arguments{
@@ -20,7 +23,14 @@ calc_dist(sim, pars)
 
 \item{pars}{parameter set}
 
+\item{dat}{a data for composing likelihood-free distance}
+
 \item{lf}{a sim_model_likefree object}
+
+\item{lik}{a sim_model_likelihood object}
+}
+\value{
+
 }
 \description{
 Calculate the distance between data and simulated dynamics

@@ -25,7 +25,7 @@ warmup.sim_model <- function(sim, y0, pars, times = sim$TS_wp) {
     y0 <- sim$Y0_wp
   }
 
-  inp <- pars
+  inp <- sim$r_sto_wp(pars, sim$Input_sim)
   inp$Y0 <- y0
 
   cm_wp <- sim$CM_wp

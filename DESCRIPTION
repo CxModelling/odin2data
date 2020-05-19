@@ -1,7 +1,7 @@
 Package: odin2data
 Type: Package
 Title: A Model Fitting Toolkit For Simulation Models With The Odin Package (Title Case)
-Version: 0.1.0
+Version: 1.0.1
 Author: Chu-Chang Ku
 Maintainer: TimeWz667 <TimeWz667@gmail.com>
 Description: More about what it does (maybe more than one line)
@@ -13,6 +13,6 @@ LazyData: true
 Import:
   odin
   densratio
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.0
 Suggests: 
     testthat

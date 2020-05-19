@@ -10,8 +10,9 @@ compile_model_likefree(dat, sim)
 \item{dat}{a dataframe of data to be fitted, "t" as the indicator of time}
 
 \item{sim}{a compile model, see compile_model}
-
-\item{y0}{initial values of the model}
+}
+\value{
+a compiled model with data
 }
 \description{
 Compile a simulation model with a likelihood-free link to data

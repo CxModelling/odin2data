@@ -15,6 +15,9 @@ ess(obj)
 \arguments{
 \item{obj}{}
 }
+\value{
+
+}
 \description{
 Effective Sample Size (ESS)
 }
