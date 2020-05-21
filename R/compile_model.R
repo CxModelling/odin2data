@@ -65,7 +65,7 @@ test_model <- function(d_prior, r_prior, y0, inp_sim = NULL, ts_sim, m_sim, r_st
       CM_wp = cm_wp,
       r_sto_wp = r_sto_wp,
       Time_wp = range(ts_wp),
-      TS_wp = ts_wp,
+      TS_wp = ts_wp
     ))
 
     if(!missing(fn_check)) {
