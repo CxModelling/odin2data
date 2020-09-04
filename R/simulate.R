@@ -41,12 +41,13 @@ simulate.sim_model <- function(sim, y0, pars, warmup = T) {
   cm_sim <- sim$CM_sim
   cm_sim$set_user(user = inp)
 
-  st <- system.time({ ys <- cm_sim$run(sim$TS_sim, method = sim$Method) })
+  st <- system.time({ ys <- cm_sim$run(sim$TS_sim, method = "rk4") })
 
   res <- list(
     Y0 = y0,
     Parameters = pars,
     Ys = ys,
+    Sto = sto,
     ProcTime = st
   )
   if (warmup & sim$WarmupStage == "Yes") {
