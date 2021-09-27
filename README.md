@@ -72,9 +72,10 @@ summary(post)
 
 Chu-Chang Ku,
 
-Health Economic and Decision Science, University of Sheffield, UK
+Department of Infectious Disease Epidemiology, Imperial College London, UK
+(Health Economic and Decision Science, University of Sheffield, UK)
 
-Email: c.ku@sheffield.ac.uk
+Email: c.ku@ic.ac.uk
 
 
 ## License
